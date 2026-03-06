@@ -51,27 +51,13 @@ def make_model(model_name):
 
 
 MODEL_NAMES = [
-    "edgenext",  # works bf16
-    "nextvit_small_384",  # works on bf16, no float16
-    "tinyvit_512",
-    "tinyvit_s_224",
-    "tinynet_152",  # Works bf16
+    "eva_large_patch_196",  # use_naflex=True
     "tinyvit_224",
-    "coatnet_384",  # bf16
-    "eva_large_patch_196",
-    "ecaresnet_160",
-    "mobilenet_v4",  # Works bf16
-    "maxvit_b_512",  # bf16
-    "fastvit_apple",  # BF16
-    "tinynet_106",  # works bf16
-    "caformer_b_384",  # bf16
-    "resnext_172_89m",
-    "efficientnet_600",  # works bf16
-    "eva02_b",  # works on bf16
-    "efficientnet_192",  # BF16 works on small batches, no float16, error on pow() fn compiling
-    "mobilenet_v4_s",  # No bf16 on large batches somehow, works at bf16, low batch, LR 1e-4
-    "coatnext",  # works on small batches but somehow Needs its own classifier head
-    "mobilenet_v4_s_448",  # NO BF16 AT ALL
+    "tinyvit_s_224",
+    "tinyvit_512",
+    "coatnet_384",
+    "caformer_s_384",
+    "caformer_b_384",
 ]
 # Run settings
 MAX_EPOCHS = 300
@@ -145,7 +131,9 @@ if __name__ == "__main__":
         torch.multiprocessing.set_start_method("spawn")
     for MODEL_NAME in MODEL_NAMES:
         try:
-            KLOGGER.info(f"\n\n------------\n{MODEL_NAME}\n{PROCESSOR_OPTIONS}\n-----------")
+            KLOGGER.info(
+                f"\n\n------------\n{MODEL_NAME}\n{PROCESSOR_OPTIONS}\n-----------"
+            )
             model = make_model(MODEL_NAME)
             model.to(DEVICE, non_blocking=True)
             model_input_shape = (3, model.crop_size, model.crop_size)
@@ -153,7 +141,9 @@ if __name__ == "__main__":
             model.forward(torch.rand(*(4, *model_input_shape), device=DEVICE))
             model_size_mb = find_model_size(model)
             KLOGGER.info(model)
-            KLOGGER.info(f"Using: {MODEL_NAME} | {model.crop_size} | {model_size_mb:.3f}MB")
+            KLOGGER.info(
+                f"Using: {MODEL_NAME} | {model.crop_size} | {model_size_mb:.3f}MB"
+            )
             #################################
             #                               #
             #     Optimize Training Run     #
@@ -199,7 +189,9 @@ if __name__ == "__main__":
             KLOGGER.info(f"Learning Rate: {LEARNING_RATE}")
             ### NOW PREP LOADERS
             if not NUM_WORKERS:
-                NUM_WORKERS = int(min(MAX_CPU_THREADS, BATCH_SIZE / IMG_PER_THREAD))
+                NUM_WORKERS = int(
+                    min(MAX_CPU_THREADS, BATCH_SIZE / IMG_PER_THREAD)
+                )
             train_processor = etl.img_transforms(
                 model.crop_size,
                 train_mode=True,
@@ -221,7 +213,9 @@ if __name__ == "__main__":
                 NUM_WORKERS = 1
             DATALOADER_OPTIONS["batch_size"] = BATCH_SIZE
             DATALOADER_OPTIONS["num_workers"] = NUM_WORKERS
-            KLOGGER.info(f"Using batch_size: {BATCH_SIZE}, cpu threads: {NUM_WORKERS}")
+            KLOGGER.info(
+                f"Using batch_size: {BATCH_SIZE}, cpu threads: {NUM_WORKERS}"
+            )
             # Test Dataloader can have fewer workers
             test_dataloader_opts = deepcopy(DATALOADER_OPTIONS)
             test_dataloader_opts["prefetch_factor"] = 1
@@ -308,7 +302,9 @@ if __name__ == "__main__":
             for k in val:
                 cs.KLOGGER.info(f"{k}: {val[k]:.2f}")
         except Exception as e:
-            KLOGGER.error(f"\n\n---\nstr(e)\n---\n{traceback.format_exc()}\n---\n\n")
+            KLOGGER.error(
+                f"\n\n---\nstr(e)\n---\n{traceback.format_exc()}\n---\n\n"
+            )
         finally:
             model = None
             torch.cuda.empty_cache()
