@@ -13,14 +13,60 @@ dependencies = [
   "pillow>=11.1.0",
   "scikit-image>=0.25.2",
   "scipy>=1.15.2",
-  "torch>= 2.7.0",
-  "torchvision>=0.22",
-  "torch!=2.7.0+cpu ; sys_platform == 'darwin'",
-  "torchvision!=0.22+cpu ; sys_platform == 'darwin'",
   "timm",
   "scikit-learn>=1.7.0",
 ]
 
+
+[project.optional-dependencies]
+cpu = [
+  "torch>=2.9.1",
+  "torchvision>=0.24.1",
+]
+cu128 = [
+  "torch>=2.9.1",
+  "torchvision>=0.24.1",
+]
+xpu = [
+  "torch>=2.9.1",
+  "torchvision>=0.24.1",
+]
+
+[tool.uv]
+conflicts = [
+  [
+    { extra = "cpu" },
+    { extra = "xpu" },
+    { extra = "cu128" },
+  ],
+]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cpu", extra = "xpu" },
+  { index = "pytorch-cu128", extra = "cu128" },
+]
+torchvision = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cpu", extra = "xpu" },
+  { index = "pytorch-cu128", extra = "cu128" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-xpu"
+url = "https://download.pytorch.org/whl/xpu"
+explicit = true
 
 [tool.ruff]
 exclude = [
